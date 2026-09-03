@@ -13,7 +13,7 @@ export function useBoardData() {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch(`/data/board.json?t=${Date.now()}`);
+      const res = await fetch(`/api/board?t=${Date.now()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json: BoardData = await res.json();
       setData(json);
