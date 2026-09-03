@@ -1,8 +1,0 @@
-# Linear API Key - obtener desde https://linear.app/settings/account/security
-LINEAR_API_KEY=
-
-# ID del proyecto de Linear (se puede obtener con el script: npx tsx scripts/fetch-linear-data.ts --list-projects)
-LINEAR_PROJECT_ID=
-
-# (Opcional) ID del equipo - si no se especifica, se obtiene del proyecto
-LINEAR_TEAM_ID=
