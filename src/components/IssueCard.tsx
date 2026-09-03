@@ -1,0 +1,50 @@
+import type { BoardIssue } from "@/types/board";
+
+const priorityConfig: Record<number, { label: string; class: string }> = {
+  0: { label: "", class: "" },
+  1: { label: "Urgente", class: "bg-red-100 text-red-700" },
+  2: { label: "Alta", class: "bg-orange-100 text-orange-700" },
+  3: { label: "Media", class: "bg-yellow-100 text-yellow-700" },
+  4: { label: "Baja", class: "bg-gray-100 text-gray-500" },
+};
+
+export function IssueCard({ issue }: { issue: BoardIssue }) {
+  const priority = priorityConfig[issue.priority] ?? priorityConfig[0];
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start gap-2">
+        <span className="text-xs font-mono text-gray-400 shrink-0 mt-0.5">
+          {issue.identifier}
+        </span>
+        <p className="text-sm text-gray-800 leading-snug font-medium line-clamp-2">
+          {issue.title}
+        </p>
+      </div>
+
+      {(priority.label || issue.labels.length > 0) && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {priority.label && (
+            <span
+              className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${priority.class}`}
+            >
+              {priority.label}
+            </span>
+          )}
+          {issue.labels.map((label) => (
+            <span
+              key={label.name}
+              className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded"
+              style={{
+                backgroundColor: `${label.color}20`,
+                color: label.color,
+              }}
+            >
+              {label.name}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
