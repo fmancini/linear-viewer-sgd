@@ -60,10 +60,9 @@ async function fetchBoardData(): Promise<BoardData> {
   let afterCursor: string | undefined;
 
   while (hasNextPage) {
-    const issuesPage = await client.issues({
+    const issuesPage = await project.issues({
       first: 100,
-      after: afterCursor,
-      filter: { project: { id: { eq: PROJECT_ID } } },
+      ...(afterCursor ? { after: afterCursor } : {}),
     });
 
     for (const issue of issuesPage.nodes) {
