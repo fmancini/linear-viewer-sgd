@@ -33,12 +33,14 @@ export async function fetchBoardData(): Promise<BoardData> {
     throw new Error(`Proyecto no encontrado: ${projectId}`);
   }
 
-  const allIssues: {
+  // Fetch all issues for the project (one query per 100 issues)
+  const issueNodes: {
     identifier: string;
     title: string;
     priority: number;
-    state: { id: string; name: string; type: string; color: string; position: number };
-    labels: { name: string; color: string }[];
+    stateId: string | undefined;
+    teamId: string | undefined;
+    labelIds: string[];
   }[] = [];
 
   let hasNextPage = true;
@@ -51,48 +53,45 @@ export async function fetchBoardData(): Promise<BoardData> {
     });
 
     for (const issue of issuesPage.nodes) {
-      const state = await issue.state;
-      const labelsConnection = await issue.labels();
-
-      if (state) {
-        allIssues.push({
-          identifier: issue.identifier,
-          title: issue.title,
-          priority: issue.priority,
-          state: {
-            id: state.id,
-            name: state.name,
-            type: state.type,
-            color: state.color,
-            position: state.position,
-          },
-          labels: labelsConnection.nodes.map((l) => ({
-            name: l.name,
-            color: l.color,
-          })),
-        });
-      }
+      issueNodes.push({
+        identifier: issue.identifier,
+        title: issue.title,
+        priority: issue.priority,
+        stateId: issue.stateId,
+        teamId: issue.teamId,
+        labelIds: issue.labelIds ?? [],
+      });
     }
 
     hasNextPage = issuesPage.pageInfo.hasNextPage;
     afterCursor = issuesPage.pageInfo.endCursor ?? undefined;
   }
 
+  // Collect team IDs from the project and from the issues
+  const teamsConnection = await project.teams();
+  const projectTeamMap = new Map(teamsConnection.nodes.map((t) => [t.id, t]));
+
+  const missingTeamIds = new Set<string>();
+  for (const issue of issueNodes) {
+    if (issue.teamId && !projectTeamMap.has(issue.teamId)) {
+      missingTeamIds.add(issue.teamId);
+    }
+  }
+
+  // Fetch extra teams referenced by issues but not associated with the project
+  for (const teamId of missingTeamIds) {
+    const team = await client.team(teamId);
+    if (team) projectTeamMap.set(team.id, team);
+  }
+
+  // Fetch workflow states from all relevant teams (one query per team)
   const statesMap = new Map<
     string,
     { id: string; name: string; type: string; color: string; position: number }
   >();
 
-  for (const issue of allIssues) {
-    if (!statesMap.has(issue.state.id)) {
-      statesMap.set(issue.state.id, issue.state);
-    }
-  }
-
-  const teams = await project.teams();
-  if (teams.nodes.length > 0) {
-    const team = teams.nodes[0];
-    const states = await team.states();
+  for (const team of projectTeamMap.values()) {
+    const states = await team.states({ first: 100 });
     for (const state of states.nodes) {
       if (!statesMap.has(state.id)) {
         statesMap.set(state.id, {
@@ -104,6 +103,52 @@ export async function fetchBoardData(): Promise<BoardData> {
         });
       }
     }
+  }
+
+  // Fetch all issue labels in the workspace (one query per 100 labels)
+  const labelsMap = new Map<string, { name: string; color: string }>();
+  let labelsHasNextPage = true;
+  let labelsAfterCursor: string | undefined;
+
+  while (labelsHasNextPage) {
+    const labelsPage = await client.issueLabels({
+      first: 100,
+      ...(labelsAfterCursor ? { after: labelsAfterCursor } : {}),
+    });
+
+    for (const label of labelsPage.nodes) {
+      if (!labelsMap.has(label.id)) {
+        labelsMap.set(label.id, { name: label.name, color: label.color });
+      }
+    }
+
+    labelsHasNextPage = labelsPage.pageInfo.hasNextPage;
+    labelsAfterCursor = labelsPage.pageInfo.endCursor ?? undefined;
+  }
+
+  // Map issues to BoardIssue using the cached states and labels
+  const allIssues: {
+    identifier: string;
+    title: string;
+    priority: number;
+    state: { id: string; name: string; type: string; color: string; position: number };
+    labels: { name: string; color: string }[];
+  }[] = [];
+
+  for (const issue of issueNodes) {
+    if (!issue.stateId || !statesMap.has(issue.stateId)) continue;
+    const state = statesMap.get(issue.stateId)!;
+    const labels = issue.labelIds
+      .map((id) => labelsMap.get(id))
+      .filter((l): l is { name: string; color: string } => !!l);
+
+    allIssues.push({
+      identifier: issue.identifier,
+      title: issue.title,
+      priority: issue.priority,
+      state,
+      labels,
+    });
   }
 
   const typeOrder: Record<string, number> = {
@@ -155,7 +200,7 @@ export async function fetchBoardData(): Promise<BoardData> {
     canceledIssues,
   };
 
-  const teamName = teams.nodes.length > 0 ? teams.nodes[0].name : "Sin equipo";
+  const teamName = teamsConnection.nodes.length > 0 ? teamsConnection.nodes[0].name : "Sin equipo";
 
   return {
     team: teamName,
