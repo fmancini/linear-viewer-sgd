@@ -1,6 +1,7 @@
 import { writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { dirname } from "path";
 import { fetchBoardData, listProjects } from "../src/lib/linear";
+import { getBoardCacheFile } from "../src/lib/board-cache-path";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -20,11 +21,9 @@ async function main() {
 
   const data = await fetchBoardData();
 
-  const outDir = join(process.cwd(), "public", "data");
-  mkdirSync(outDir, { recursive: true });
-
-  const outPath = join(outDir, "board.json");
-  writeFileSync(outPath, JSON.stringify(data, null, 2), "utf-8");
+  const outPath = getBoardCacheFile();
+  mkdirSync(dirname(outPath), { recursive: true });
+  writeFileSync(outPath, JSON.stringify(data, null, 2), { encoding: "utf-8", mode: 0o600 });
 
   console.log(`\nDatos guardados en ${outPath}`);
   console.log(`Equipo: ${data.team}`);

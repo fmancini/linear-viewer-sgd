@@ -42,3 +42,4 @@ next-env.d.ts
 
 # generated data
 /public/data/board.json
+/.cache/

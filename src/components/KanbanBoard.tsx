@@ -5,6 +5,7 @@ import type { BoardData } from "@/types/board";
 import { KanbanColumn } from "./KanbanColumn";
 import { ProgressBar } from "./ProgressBar";
 import { ThemeToggle } from "./ThemeToggle";
+import { AuthButton } from "./AuthButton";
 
 interface KanbanBoardProps {
   data: BoardData;
@@ -68,7 +69,7 @@ export function KanbanBoard({ data, lastFetch, onRefresh }: KanbanBoardProps) {
       <header className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{data.team}</h1>
-          <p className="text-sm text-subtle">Tablero publico del proyecto</p>
+          <p className="text-sm text-subtle">Tablero privado del proyecto</p>
         </div>
         <div className="flex items-center gap-3">
           {lastFetch && (
@@ -81,6 +82,7 @@ export function KanbanBoard({ data, lastFetch, onRefresh }: KanbanBoardProps) {
             </span>
           )}
           <ThemeToggle />
+          <AuthButton action="logout" />
           <button
             onClick={onRefresh}
             className="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors cursor-pointer text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 border-indigo-200 hover:border-indigo-300 dark:border-indigo-900/50 dark:hover:border-indigo-700"

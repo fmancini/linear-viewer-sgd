@@ -7,12 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx --test scripts/auth.test.ts",
+    "test:auth-integration": "tsx --test scripts/auth-integration.test.ts",
     "fetch-data": "tsx scripts/fetch-linear-data.ts",
     "list-projects": "tsx scripts/fetch-linear-data.ts --list-projects"
   },
   "dependencies": {
     "@linear/sdk": "^93.0.0",
     "next": "16.3.4",
+    "next-auth": "4.24.15",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

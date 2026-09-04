@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Tablero de Proyecto - Linear",
-  description: "Tablero kanban publico del proyecto en Linear",
+  description: "Tablero privado del proyecto en Linear",
+  robots: { index: false, follow: false },
 };
 
 const themeScript = `

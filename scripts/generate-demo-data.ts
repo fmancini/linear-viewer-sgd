@@ -86,7 +86,7 @@ const demoData: BoardData = {
   updatedAt: new Date().toISOString(),
 };
 
-const outDir = join(process.cwd(), "public", "data");
+const outDir = join(process.cwd(), ".cache", "demo");
 mkdirSync(outDir, { recursive: true });
 
 const outPath = join(outDir, "board.json");

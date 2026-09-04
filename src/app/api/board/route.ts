@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { fetchBoardData } from "@/lib/linear";
+import { getAuthorizedSession } from "@/lib/auth";
+import { getBoardCacheFile } from "@/lib/board-cache-path";
 import type { BoardData } from "@/types/board";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
-import { join } from "path";
+import { dirname } from "path";
 
-const CACHE_FILE = join(process.cwd(), "public", "data", "board.json");
+const CACHE_FILE = getBoardCacheFile();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 
 let fetching: Promise<BoardData> | null = null;
@@ -22,28 +24,38 @@ function readCache(): { data: BoardData; mtime: number } | null {
 
 function writeCache(data: BoardData) {
   try {
-    mkdirSync(join(process.cwd(), "public", "data"), { recursive: true });
-    writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2), "utf-8");
+    mkdirSync(dirname(CACHE_FILE), { recursive: true });
+    writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2), { encoding: "utf-8", mode: 0o600 });
   } catch {
     // Si no podemos escribir cache, seguimos sin fallar
   }
 }
 
+function json(data: BoardData | { error: string }, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: { "Cache-Control": "private, no-store", Vary: "Cookie" },
+  });
+}
+
 export async function GET() {
+  if (!(await getAuthorizedSession())) {
+    return json({ error: "Debes iniciar sesión con una cuenta autorizada." }, 401);
+  }
+
   const cache = readCache();
   const now = Date.now();
 
   if (cache && now - cache.mtime < CACHE_TTL) {
-    return NextResponse.json(cache.data);
+    return json(cache.data);
   }
 
   if (fetching) {
     try {
       const data = await fetching;
-      return NextResponse.json(data);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Error desconocido";
-      return NextResponse.json({ error: message }, { status: 500 });
+      return json(data);
+    } catch {
+      return json({ error: "No se pudieron actualizar los datos. Intenta más tarde." }, 503);
     }
   }
 
@@ -67,9 +79,8 @@ export async function GET() {
 
   try {
     const data = await fetching;
-    return NextResponse.json(data);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Error desconocido";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return json(data);
+  } catch {
+    return json({ error: "No se pudieron actualizar los datos. Intenta más tarde." }, 503);
   }
 }

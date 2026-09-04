@@ -13,7 +13,12 @@ export function useBoardData() {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/board?t=${Date.now()}`);
+      const res = await fetch("/api/board", { cache: "no-store" });
+      if (res.status === 401 || res.status === 403) {
+        setData(null);
+        window.location.replace("/login");
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json: BoardData = await res.json();
       setData(json);
