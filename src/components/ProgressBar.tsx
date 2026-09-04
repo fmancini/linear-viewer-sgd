@@ -13,17 +13,17 @@ export function ProgressBar({ project }: { project: ProjectProgress }) {
     project.totalIssues - project.completedIssues - project.canceledIssues;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+    <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-lg font-semibold text-gray-900">{project.name}</h2>
-        <span className="text-sm font-medium text-gray-500">
+        <h2 className="text-lg font-semibold text-foreground">{project.name}</h2>
+        <span className="text-sm font-medium text-muted">
           {stateLabels[project.state] ?? project.state}
         </span>
       </div>
 
       {/* Dates */}
       {(project.startDate || project.targetDate) && (
-        <p className="text-xs text-gray-400 mb-3">
+        <p className="text-xs text-subtle mb-3">
           {project.startDate && (
             <span>Inicio: {new Date(project.startDate).toLocaleDateString("es-CL")}</span>
           )}
@@ -35,31 +35,31 @@ export function ProgressBar({ project }: { project: ProjectProgress }) {
       )}
 
       {/* Progress bar */}
-      <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+      <div className="w-full bg-surface rounded-full h-3 overflow-hidden">
         <div
-          className="h-full rounded-full bg-indigo-500 transition-all duration-500"
+          className="h-full rounded-full bg-indigo-500 dark:bg-indigo-400 transition-all duration-500"
           style={{ width: `${Math.min(project.progress, 100)}%` }}
         />
       </div>
 
       {/* Stats */}
       <div className="flex items-center justify-between mt-2">
-        <span className="text-2xl font-bold text-gray-900">
+        <span className="text-2xl font-bold text-foreground">
           {project.progress}%
         </span>
-        <div className="flex gap-4 text-xs text-gray-500">
+        <div className="flex gap-4 text-xs text-muted">
           <span>
-            <span className="font-semibold text-green-600">
+            <span className="font-semibold text-green-600 dark:text-green-400">
               {project.completedIssues}
             </span>{" "}
             completados
           </span>
           <span>
-            <span className="font-semibold text-blue-600">{activeIssues}</span>{" "}
+            <span className="font-semibold text-blue-600 dark:text-blue-400">{activeIssues}</span>{" "}
             activos
           </span>
           <span>
-            <span className="font-semibold text-gray-400">
+            <span className="font-semibold text-subtle">
               {project.totalIssues}
             </span>{" "}
             total

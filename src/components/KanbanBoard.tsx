@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { BoardData } from "@/types/board";
 import { KanbanColumn } from "./KanbanColumn";
 import { ProgressBar } from "./ProgressBar";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface KanbanBoardProps {
   data: BoardData;
@@ -66,12 +67,12 @@ export function KanbanBoard({ data, lastFetch, onRefresh }: KanbanBoardProps) {
       {/* Header */}
       <header className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{data.team}</h1>
-          <p className="text-sm text-gray-400">Tablero publico del proyecto</p>
+          <h1 className="text-2xl font-bold text-foreground">{data.team}</h1>
+          <p className="text-sm text-subtle">Tablero publico del proyecto</p>
         </div>
         <div className="flex items-center gap-3">
           {lastFetch && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-subtle">
               Actualizado:{" "}
               {lastFetch.toLocaleTimeString("es-CL", {
                 hour: "2-digit",
@@ -79,9 +80,10 @@ export function KanbanBoard({ data, lastFetch, onRefresh }: KanbanBoardProps) {
               })}
             </span>
           )}
+          <ThemeToggle />
           <button
             onClick={onRefresh}
-            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 rounded-lg border border-indigo-200 hover:border-indigo-300 transition-colors cursor-pointer"
+            className="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors cursor-pointer text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 border-indigo-200 hover:border-indigo-300 dark:border-indigo-900/50 dark:hover:border-indigo-700"
           >
             Actualizar
           </button>
