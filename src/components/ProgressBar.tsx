@@ -12,6 +12,11 @@ export function ProgressBar({ project }: { project: ProjectProgress }) {
   const activeIssues =
     project.totalIssues - project.completedIssues - project.canceledIssues;
 
+  const completedPercent =
+    project.totalIssues > 0
+      ? Math.round((project.completedIssues / project.totalIssues) * 100)
+      : 0;
+
   return (
     <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
       <div className="flex items-center justify-between mb-1">
@@ -38,15 +43,18 @@ export function ProgressBar({ project }: { project: ProjectProgress }) {
       <div className="w-full bg-surface rounded-full h-3 overflow-hidden">
         <div
           className="h-full rounded-full bg-indigo-500 dark:bg-indigo-400 transition-all duration-500"
-          style={{ width: `${Math.min(project.progress, 100)}%` }}
+          style={{ width: `${Math.min(completedPercent, 100)}%` }}
         />
       </div>
 
       {/* Stats */}
       <div className="flex items-center justify-between mt-2">
-        <span className="text-2xl font-bold text-foreground">
-          {project.progress}%
-        </span>
+        <div>
+          <span className="text-2xl font-bold text-foreground">
+            {completedPercent}%
+          </span>
+          <p className="text-[10px] text-subtle">Completado del total cargado</p>
+        </div>
         <div className="flex gap-4 text-xs text-muted">
           <span>
             <span className="font-semibold text-green-600 dark:text-green-400">
