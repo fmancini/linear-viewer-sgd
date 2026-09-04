@@ -3,7 +3,7 @@ import { IssueCard } from "./IssueCard";
 
 export function KanbanColumn({ column }: { column: BoardColumn }) {
   return (
-    <div className="flex flex-col min-w-[280px] max-w-[320px] shrink-0">
+    <div className="flex flex-col min-w-[260px] flex-1 h-full">
       {/* Column header */}
       <div className="flex items-center gap-2 mb-3 px-1">
         <span

@@ -47,7 +47,7 @@ export function KanbanBoard({ data, lastFetch, onRefresh }: KanbanBoardProps) {
       <ProgressBar project={data.project} />
 
       {/* Kanban columns */}
-      <div className="flex gap-4 overflow-x-auto flex-1 pb-4">
+      <div className="flex gap-4 overflow-x-auto flex-1 pb-4 w-full">
         {visibleColumns.map((column) => (
           <KanbanColumn key={column.id} column={column} />
         ))}
