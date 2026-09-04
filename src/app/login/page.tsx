@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getAuthorizedSession, isAuthConfigured } from "@/lib/auth";
 import { AuthButton } from "@/components/AuthButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { APP_VERSION } from "@/lib/app-version";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function Login({
   const { error } = await searchParams;
 
   return (
-    <main className="flex flex-1 items-center justify-center p-6">
+    <main className="flex flex-1 flex-col items-center justify-center p-6">
       <section className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-sm">
         <div className="flex items-center justify-between gap-4 mb-6">
           <h1 className="text-xl font-bold text-foreground">Acceso al tablero</h1>
@@ -36,6 +37,7 @@ export default async function Login({
           </p>
         )}
       </section>
+      <p className="mt-4 text-center text-xs text-subtle">v{APP_VERSION}</p>
     </main>
   );
 }

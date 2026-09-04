@@ -6,6 +6,7 @@ import { KanbanColumn } from "./KanbanColumn";
 import { ProgressBar } from "./ProgressBar";
 import { ThemeToggle } from "./ThemeToggle";
 import { AuthButton } from "./AuthButton";
+import { APP_VERSION } from "@/lib/app-version";
 
 interface KanbanBoardProps {
   data: BoardData;
@@ -111,6 +112,8 @@ export function KanbanBoard({ data, lastFetch, onRefresh }: KanbanBoardProps) {
           <KanbanColumn key={column.id} column={column} />
         ))}
       </div>
+
+      <p className="text-center text-xs text-subtle">v{APP_VERSION}</p>
     </div>
   );
 }
