@@ -11,6 +11,8 @@ export interface BoardIssue {
   title: string;
   priority: number; // 0=None, 1=Urgent, 2=High, 3=Medium, 4=Low
   labels: { name: string; color: string }[];
+  milestone: string | null;
+  assignee: string | null;
 }
 
 export interface BoardColumn {

@@ -45,6 +45,21 @@ export function IssueCard({ issue }: { issue: BoardIssue }) {
           ))}
         </div>
       )}
+
+      {(issue.milestone || issue.assignee) && (
+        <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px] text-gray-500">
+          {issue.milestone && (
+            <span className="truncate" title={issue.milestone}>
+              <span className="font-medium text-gray-600">Hito:</span> {issue.milestone}
+            </span>
+          )}
+          {issue.assignee && (
+            <span className="truncate" title={issue.assignee}>
+              <span className="font-medium text-gray-600">Asignado:</span> {issue.assignee}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

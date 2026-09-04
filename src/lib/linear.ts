@@ -41,6 +41,8 @@ export async function fetchBoardData(): Promise<BoardData> {
     stateId: string | undefined;
     teamId: string | undefined;
     labelIds: string[];
+    milestoneId: string | undefined;
+    assigneeId: string | undefined;
   }[] = [];
 
   let hasNextPage = true;
@@ -60,6 +62,8 @@ export async function fetchBoardData(): Promise<BoardData> {
         stateId: issue.stateId,
         teamId: issue.teamId,
         labelIds: issue.labelIds ?? [],
+        milestoneId: issue.projectMilestoneId,
+        assigneeId: issue.assigneeId,
       });
     }
 
@@ -126,6 +130,44 @@ export async function fetchBoardData(): Promise<BoardData> {
     labelsAfterCursor = labelsPage.pageInfo.endCursor ?? undefined;
   }
 
+  // Fetch project milestones (one query per 100)
+  const milestonesMap = new Map<string, string>();
+  let milestonesHasNextPage = true;
+  let milestonesAfterCursor: string | undefined;
+
+  while (milestonesHasNextPage) {
+    const milestonesPage = await project.projectMilestones({
+      first: 100,
+      ...(milestonesAfterCursor ? { after: milestonesAfterCursor } : {}),
+    });
+
+    for (const milestone of milestonesPage.nodes) {
+      milestonesMap.set(milestone.id, milestone.name);
+    }
+
+    milestonesHasNextPage = milestonesPage.pageInfo.hasNextPage;
+    milestonesAfterCursor = milestonesPage.pageInfo.endCursor ?? undefined;
+  }
+
+  // Fetch workspace users (one query per 100)
+  const usersMap = new Map<string, string>();
+  let usersHasNextPage = true;
+  let usersAfterCursor: string | undefined;
+
+  while (usersHasNextPage) {
+    const usersPage = await client.users({
+      first: 100,
+      ...(usersAfterCursor ? { after: usersAfterCursor } : {}),
+    });
+
+    for (const user of usersPage.nodes) {
+      usersMap.set(user.id, user.displayName || user.name || "Sin nombre");
+    }
+
+    usersHasNextPage = usersPage.pageInfo.hasNextPage;
+    usersAfterCursor = usersPage.pageInfo.endCursor ?? undefined;
+  }
+
   // Map issues to BoardIssue using the cached states and labels
   const allIssues: {
     identifier: string;
@@ -133,6 +175,8 @@ export async function fetchBoardData(): Promise<BoardData> {
     priority: number;
     state: { id: string; name: string; type: string; color: string; position: number };
     labels: { name: string; color: string }[];
+    milestone: string | null;
+    assignee: string | null;
   }[] = [];
 
   for (const issue of issueNodes) {
@@ -148,6 +192,8 @@ export async function fetchBoardData(): Promise<BoardData> {
       priority: issue.priority,
       state,
       labels,
+      milestone: issue.milestoneId ? milestonesMap.get(issue.milestoneId) ?? null : null,
+      assignee: issue.assigneeId ? usersMap.get(issue.assigneeId) ?? null : null,
     });
   }
 
@@ -182,6 +228,8 @@ export async function fetchBoardData(): Promise<BoardData> {
             title: i.title,
             priority: i.priority,
             labels: i.labels,
+            milestone: i.milestone,
+            assignee: i.assignee,
           })
         ),
     }));
